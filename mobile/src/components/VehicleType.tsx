@@ -1,7 +1,13 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 
-export default function VehicleType({ icon, title, onPress }) {
+interface VehicleTypeProps {
+  icon: string;
+  title: string;
+  onPress: () => void;
+}
+
+export default function VehicleType({ icon, title, onPress }: VehicleTypeProps): React.JSX.Element {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.iconContainer}>
@@ -15,7 +21,7 @@ export default function VehicleType({ icon, title, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor:  '#fff',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
     margin: 6,
@@ -31,7 +37,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginBottom: 12,
   },
-  icon:  {
+  icon: {
     fontSize: 48,
   },
   title: {

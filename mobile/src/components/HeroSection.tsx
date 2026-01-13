@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 
-export default function HeroSection({ city }) {
+interface HeroSectionProps {
+  city: string;
+}
+
+export default function HeroSection({ city }: HeroSectionProps): React.JSX.Element {
   return (
     <ImageBackground 
       source={{ uri: 'https://5.imimg.com/data5/DC/CN/MY-28768779/tata-ace-zip-mega-mint-xenon-yodha-scv.jpg' }}
@@ -10,7 +14,7 @@ export default function HeroSection({ city }) {
     >
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Delivery hai?  🚚</Text>
+          <Text style={styles.title}>Delivery hai? 🚚</Text>
           <Text style={styles.subtitle}>#ChotaHathiKarDega</Text>
         </View>
       </View>
@@ -27,7 +31,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-   // backgroundColor: 'rgba(255, 107, 53, 0.85)', // Semi-transparent orange overlay
   },
   content: {
     flex: 1,

@@ -1,3 +1,5 @@
+//standard setup for Expo TypeScript projects.
+// It's just a JavaScript entry point for the app.
 import { registerRootComponent } from 'expo';
 
 import App from './App';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
-export default function LoadingSpinner() {
+export default function LoadingSpinner(): React.JSX.Element {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#FF6B35" />
@@ -9,7 +9,7 @@ export default function LoadingSpinner() {
   );
 }
 
-const styles = StyleSheet. create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

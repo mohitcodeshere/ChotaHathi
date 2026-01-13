@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 import HeroSection from '../components/HeroSection';
 import CitySelector from '../components/CitySelector';
 import ServiceCard from '../components/ServiceCard';
 
-export default function HomeScreen({ navigation }) {
-  const [selectedCity, setSelectedCity] = useState('Delhi');
+type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-  const services = [
+interface Service {
+  id: string;
+  icon: string;
+  title: string;
+  loadType: string;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
+  const [selectedCity, setSelectedCity] = useState<string>('Delhi');
+
+  const services: Service[] = [
     { id: 'truck', icon: '🚛', title: 'Truck', loadType: 'Heavy Goods' },
     { id: 'two-wheeler', icon: '🛵', title: 'Two Wheeler', loadType: 'Small Parcels' },
-    { id:  'packers', icon: '📦', title: 'Packers', loadType: 'Home Shifting' },
+    { id: 'packers', icon: '📦', title: 'Packers', loadType: 'Home Shifting' },
   ];
 
-  const handleServiceSelect = (service) => {
+  const handleServiceSelect = (service: Service): void => {
     navigation.navigate('Booking', { 
       serviceType: service.id,
       serviceTitle: service.title,
@@ -34,7 +45,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.servicesSection}>
         <Text style={styles.sectionTitle}>Our Services</Text>
         <View style={styles.servicesGrid}>
-          {services. map((service) => (
+          {services.map((service) => (
             <ServiceCard
               key={service.id}
               icon={service.icon}
@@ -116,10 +127,10 @@ const styles = StyleSheet.create({
   enterpriseButton: {
     backgroundColor: '#4169E1',
     paddingHorizontal: 32,
-    paddingVertical:  14,
+    paddingVertical: 14,
     borderRadius: 12,
   },
-  enterpriseButtonText:  {
+  enterpriseButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
@@ -129,7 +140,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   viewOrdersButton: {
-    backgroundColor:  '#FFFFFF',
+    backgroundColor: '#FFFFFF',
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
@@ -137,13 +148,13 @@ const styles = StyleSheet.create({
     borderColor: '#FF6B35',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity:  0.1,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
   },
   viewOrdersText: {
-    fontSize:  16,
-    fontWeight:  '600',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#FF6B35',
   },
 });

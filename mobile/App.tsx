@@ -6,9 +6,23 @@ import BookingScreen from './src/screens/BookingScreen';
 import OrdersListScreen from './src/screens/OrdersListScreen';
 import OrderDetailScreen from './src/screens/OrderDetailScreen';
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Home: undefined;
+  Booking: {
+    serviceType: string;
+    serviceTitle: string;
+    loadType: string;
+    city: string;
+  };
+  OrdersList: undefined;
+  OrderDetail: {
+    orderId: string;
+  };
+};
 
-export default function App() {
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function App(): React.JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -37,7 +51,7 @@ export default function App() {
         />
         
         {/* Orders List Screen - All orders */}
-        <Stack. Screen 
+        <Stack.Screen 
           name="OrdersList" 
           component={OrdersListScreen}
           options={{ title: 'My Orders' }}

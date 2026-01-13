@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, Alert } from 'react-native';
-import { orderAPI } from '../services/api';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
+import { orderAPI, Order } from '../services/api';
 import OrderCard from '../components/OrderCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-export default function OrdersListScreen({ navigation }) {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+type OrdersListScreenProps = NativeStackScreenProps<RootStackParamList, 'OrdersList'>;
+
+export default function OrdersListScreen({ navigation }: OrdersListScreenProps): React.JSX.Element {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   // Fetch orders from backend
-  const fetchOrders = async () => {
+  const fetchOrders = async (): Promise<void> => {
     try {
       const data = await orderAPI.getPendingOrders();
-      if (data.success) {
-        setOrders(data.orders);
+      if (data.success && data.data) {
+        setOrders(data.data);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch orders');
@@ -30,13 +34,13 @@ export default function OrdersListScreen({ navigation }) {
   }, []);
 
   // Pull to refresh handler
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback((): void => {
     setRefreshing(true);
     fetchOrders();
   }, []);
 
   // Navigate to order detail
-  const handleOrderPress = (order) => {
+  const handleOrderPress = (order: Order): void => {
     navigation.navigate('OrderDetail', { orderId: order._id });
   };
 
@@ -60,7 +64,7 @@ export default function OrdersListScreen({ navigation }) {
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📭</Text>
             <Text style={styles.emptyText}>No orders yet</Text>
-            <Text style={styles.emptySubtext}>Book your first delivery! </Text>
+            <Text style={styles.emptySubtext}>Book your first delivery!</Text>
           </View>
         }
       />
@@ -71,9 +75,9 @@ export default function OrdersListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:  '#F5F5F5',
+    backgroundColor: '#F5F5F5',
   },
-  listContent:  {
+  listContent: {
     padding: 16,
   },
   emptyContainer: {
@@ -91,7 +95,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptySubtext: {
-    fontSize:  16,
+    fontSize: 16,
     color: '#999',
   },
 });

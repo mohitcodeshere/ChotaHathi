@@ -1,19 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Order } from '../services/api';
 
-export default function OrderCard({ order, onPress }) {
-  const getStatusColor = (status) => {
-    const colors = {
+interface OrderCardProps {
+  order: Order;
+  onPress: (order: Order) => void;
+}
+
+type OrderStatus = 'pending' | 'accepted' | 'in_transit' | 'delivered' | 'cancelled';
+
+export default function OrderCard({ order, onPress }: OrderCardProps): React.JSX.Element {
+  const getStatusColor = (status: string): string => {
+    const colors: Record<OrderStatus, string> = {
       pending: '#FFA500',
       accepted: '#4CAF50',
       in_transit: '#2196F3',
       delivered: '#4CAF50',
-      cancelled:  '#F44336',
+      cancelled: '#F44336',
     };
-    return colors[status] || '#999';
+    return colors[status as OrderStatus] || '#999';
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       day: 'numeric', 
@@ -28,18 +36,18 @@ export default function OrderCard({ order, onPress }) {
     <TouchableOpacity style={styles.card} onPress={() => onPress(order)}>
       <View style={styles.header}>
         <Text style={styles.loadType}>📦 {order.load_type}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order. status) }]}>
-          <Text style={styles.statusText}>{order.status. toUpperCase()}</Text>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) }]}>
+          <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
         </View>
       </View>
       
       <View style={styles.locationContainer}>
         <Text style={styles.locationLabel}>📍 Pickup: </Text>
-        <Text style={styles.locationText}>{order. pickup_location}</Text>
+        <Text style={styles.locationText}>{order.pickup_location}</Text>
       </View>
       
       <View style={styles.locationContainer}>
-        <Text style={styles. locationLabel}>🎯 Drop:  </Text>
+        <Text style={styles.locationLabel}>🎯 Drop: </Text>
         <Text style={styles.locationText}>{order.drop_location}</Text>
       </View>
 
@@ -60,14 +68,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity:  0.1,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems:  'center',
+    alignItems: 'center',
     marginBottom: 12,
   },
   loadType: {
@@ -77,12 +85,12 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: 12,
-    paddingVertical:  4,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
     color: '#fff',
-    fontSize:  10,
+    fontSize: 10,
     fontWeight: 'bold',
   },
   locationContainer: {
@@ -98,14 +106,14 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
-  weight:  {
-    fontSize: 12,
+  weight: {
+    fontSize: 14,
     color: '#666',
-    marginTop: 8,
+    marginBottom: 8,
   },
-  date:  {
-    fontSize: 11,
+  date: {
+    fontSize: 12,
     color: '#999',
-    marginTop: 8,
+    marginTop: 4,
   },
 });

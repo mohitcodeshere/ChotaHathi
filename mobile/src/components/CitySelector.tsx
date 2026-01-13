@@ -10,10 +10,15 @@ const CITIES = [
   'Baijnath',
 ];
 
-export default function CitySelector({ selectedCity, onCityChange }) {
+interface CitySelectorProps {
+  selectedCity: string;
+  onCityChange: (city: string) => void;
+}
+
+export default function CitySelector({ selectedCity, onCityChange }: CitySelectorProps): React.JSX.Element {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleCitySelect = (city) => {
+  const handleCitySelect = (city: string): void => {
     onCityChange(city);
     setModalVisible(false);
   };
@@ -86,43 +91,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: '#F5F5F5',
-    marginTop: -30, // Overlap with hero section
+    marginTop: -30,
   },
   selector: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 24, // Larger radius like Figma
+    borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity:  0.15,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
+    elevation: 8,
   },
   iconContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: '#FFE5E5',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
   pinIcon: {
     fontSize: 24,
-    color: '#E91E63', // Pink color for pin
   },
   textContainer: {
     flex: 1,
   },
-  label:  {
+  label: {
     fontSize: 12,
-    color: '#999',
+    color: '#666',
     marginBottom: 2,
   },
-  city:  {
-    fontSize: 20,
-    fontWeight: '700',
+  city: {
+    fontSize: 18,
+    fontWeight: '600',
     color: '#000',
   },
-  arrow:  {
+  arrow: {
     fontSize: 12,
-    color: '#999',
+    color: '#FF6B35',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -130,44 +141,46 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor:  '#fff',
-    borderTopLeftRadius:  24,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
-    maxHeight: '60%',
+    padding: 24,
+    maxHeight: '70%',
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom:  20,
-    textAlign: 'center',
+    color: '#000',
+    marginBottom: 20,
   },
   cityItem: {
     padding: 16,
-    borderBottomWidth:  1,
-    borderBottomColor: '#F0F0F0',
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#F5F5F5',
   },
   cityItemSelected: {
-    backgroundColor: '#FFF3F0',
+    backgroundColor: '#FF6B35',
   },
   cityItemText: {
-    fontSize:  16,
-    color: '#333',
+    fontSize: 16,
+    color: '#000',
+    fontWeight: '500',
   },
   cityItemTextSelected: {
-    color: '#FF6B35',
+    color: '#fff',
     fontWeight: '600',
   },
   closeButton: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#F5F5F5',
     borderRadius: 12,
     alignItems: 'center',
   },
   closeButtonText: {
-    color:  '#fff',
     fontSize: 16,
     fontWeight: '600',
+    color: '#000',
   },
 });
