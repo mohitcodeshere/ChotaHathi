@@ -1,20 +1,55 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './src/screens/HomeScreen';
+import BookingScreen from './src/screens/BookingScreen';
+import OrdersListScreen from './src/screens/OrdersListScreen';
+import OrderDetailScreen from './src/screens/OrderDetailScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#FF6B35',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        {/* Home Screen - Landing page */}
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen}
+          options={{ headerShown: false }} // Hide header for custom design
+        />
+        
+        {/* Booking Screen - Order form */}
+        <Stack.Screen 
+          name="Booking" 
+          component={BookingScreen}
+          options={{ title: 'Book Service' }}
+        />
+        
+        {/* Orders List Screen - All orders */}
+        <Stack. Screen 
+          name="OrdersList" 
+          component={OrdersListScreen}
+          options={{ title: 'My Orders' }}
+        />
+        
+        {/* Order Detail Screen - Single order details */}
+        <Stack.Screen 
+          name="OrderDetail" 
+          component={OrderDetailScreen}
+          options={{ title: 'Order Details' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
