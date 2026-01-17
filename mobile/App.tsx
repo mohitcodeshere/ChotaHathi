@@ -1,12 +1,16 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import PhoneLoginScreen from './src/screens/PhoneLoginScreen';
+import OTPVerificationScreen from './src/screens/OTPVerificationScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import BookingScreen from './src/screens/BookingScreen';
 import OrdersListScreen from './src/screens/OrdersListScreen';
 import OrderDetailScreen from './src/screens/OrderDetailScreen';
 
 export type RootStackParamList = {
+  PhoneLogin: undefined;
+  OTPVerification: { phoneNumber: string };
   Home: undefined;
   Booking: {
     serviceType: string;
@@ -26,6 +30,7 @@ export default function App(): React.JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        initialRouteName="PhoneLogin"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#FF6B35',
@@ -36,6 +41,20 @@ export default function App(): React.JSX.Element {
           },
         }}
       >
+        {/* Phone Login Screen - Initial screen */}
+        <Stack.Screen 
+          name="PhoneLogin" 
+          component={PhoneLoginScreen}
+          options={{ headerShown: false }}
+        />
+        
+        {/* OTP Verification Screen */}
+        <Stack.Screen 
+          name="OTPVerification" 
+          component={OTPVerificationScreen}
+          options={{ title: 'Verify OTP' }}
+        />
+        
         {/* Home Screen - Landing page */}
         <Stack.Screen 
           name="Home" 
