@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, StatusBar } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
-import { orderAPI, OrderData } from '../services/api';
+import LocationPicker from '../components/LocationPickerGPS';
 
 type BookingScreenProps = NativeStackScreenProps<RootStackParamList, 'Booking'>;
 
@@ -15,178 +15,328 @@ interface FormData {
 }
 
 export default function BookingScreen({ route, navigation }: BookingScreenProps): React.JSX.Element {
-  // Receives service info from HomeScreen
   const { serviceType, serviceTitle, loadType, city } = route.params;
   
   const [formData, setFormData] = useState<FormData>({
-    vendor_id: '507f1f77bcf86cd799439011', // Dummy vendor ID for now
-    pickup_location: city || 'Dharamshala',
+    vendor_id: '507f1f77bcf86cd799439011',
+    pickup_location: city || '',
     drop_location: '',
     load_type: loadType,
     load_weight_kg: '',
   });
-  const [loading, setLoading] = useState<boolean>(false);
+
 
   const handleSubmit = async (): Promise<void> => {
-    // Validation
     if (!formData.pickup_location || !formData.drop_location) {
       Alert.alert('Error', 'Please fill pickup and drop locations');
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const orderData: OrderData = {
+    // Navigate to Fare screen instead of creating order directly
+    navigation.navigate('Fare', {
+      bookingData: {
         vendor_id: formData.vendor_id,
         pickup_location: formData.pickup_location,
         drop_location: formData.drop_location,
         load_type: formData.load_type,
-        load_weight_kg: formData.load_weight_kg ? parseFloat(formData.load_weight_kg) : undefined,
-      };
-
-      // Call backend API to create order
-      const response = await orderAPI.createOrder(orderData);
-      
-      if (response.success) {
-        Alert.alert('Success', '✅ Order created successfully!', [
-          { 
-            text: 'View Orders', 
-            onPress: () => navigation.navigate('OrdersList')
-          },
-          { 
-            text: 'Book Another', 
-            onPress: () => navigation.goBack()
-          }
-        ]);
-      }
-    } catch (error: any) {
-      Alert.alert('Error', error.error || 'Failed to create order');
-    } finally {
-      setLoading(false);
-    }
+        load_weight_kg: formData.load_weight_kg ? parseFloat(formData.load_weight_kg) : 0,
+      },
+    });
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Service Header */}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1a237e" />
+      
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.serviceIcon}>
-          {serviceType === 'truck' ? '🚛' : serviceType === 'two-wheeler' ? '🛵' : '📦'}
-        </Text>
-        <Text style={styles.serviceTitle}>{serviceTitle}</Text>
-        <Text style={styles.serviceSubtitle}>{loadType}</Text>
-      </View>
-
-      {/* Booking Form */}
-      <View style={styles.form}>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>📍 Pickup Location</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter pickup address"
-            value={formData.pickup_location}
-            onChangeText={(text) => setFormData({ ...formData, pickup_location: text })}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>🎯 Drop Location</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter drop address"
-            value={formData.drop_location}
-            onChangeText={(text) => setFormData({ ...formData, drop_location: text })}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>📦 Load Type</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., Furniture, Electronics"
-            value={formData.load_type}
-            onChangeText={(text) => setFormData({ ...formData, load_type: text })}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>⚖️ Weight (kg) - Optional</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Approximate weight"
-            keyboardType="numeric"
-            value={formData.load_weight_kg}
-            onChangeText={(text) => setFormData({ ...formData, load_weight_kg: text })}
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[styles.bookButton, loading && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={loading}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
-          <Text style={styles.bookButtonText}>
-            {loading ? 'Booking...' : '🚀 Book Now'}
-          </Text>
+          <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Text style={styles.serviceIcon}>
+            {serviceType === 'chota-hathi' ? '🚛' : '🚚'}
+          </Text>
+          <View>
+            <Text style={styles.serviceTitle}>{serviceTitle}</Text>
+            <Text style={styles.serviceSubtitle}>{loadType}</Text>
+          </View>
+        </View>
       </View>
-    </ScrollView>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Route Card */}
+        <View style={styles.routeCard}>
+          <View style={styles.routeHeader}>
+            <Text style={styles.routeTitle}>Route Details</Text>
+          </View>
+          
+          <View style={styles.routeContainer}>
+            {/* Route Flow Indicator */}
+            <View style={styles.routeIndicator}>
+              <View style={styles.dotGreen} />
+              <View style={styles.lineVertical} />
+              <View style={styles.dotRed} />
+            </View>
+
+            {/* Location Inputs */}
+            <View style={styles.locationsContainer}>
+              {/* Pickup Location */}
+              <LocationPicker
+                label="Pickup Location"
+                placeholder="Select pickup address"
+                value={formData.pickup_location}
+                onLocationSelect={(address) => setFormData({ ...formData, pickup_location: address })}
+              />
+
+              {/* Drop Location */}
+              <LocationPicker
+                label="Drop Location"
+                placeholder="Select drop address"
+                value={formData.drop_location}
+                onLocationSelect={(address) => setFormData({ ...formData, drop_location: address })}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Load Details Card */}
+        <View style={styles.detailsCard}>
+          <Text style={styles.cardTitle}>Load Details</Text>
+          
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>What are you moving?</Text>
+            <View style={styles.loadTypeOptions}>
+              {(serviceType === 'chota-hathi' 
+                ? ['Furniture', 'Construction Items', 'Electronics', 'Other']
+                : ['Steel/Iron', 'Marvels/Tiles', 'Cement', 'Ply Wood', 'Other']
+              ).map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.loadTypeChip,
+                    formData.load_type === option && styles.loadTypeChipSelected,
+                  ]}
+                  onPress={() => setFormData({ ...formData, load_type: option })}
+                >
+                  <Text style={[
+                    styles.loadTypeChipText,
+                    formData.load_type === option && styles.loadTypeChipTextSelected,
+                  ]}>
+                    {option === 'Furniture' ? '🪑' : 
+                     option === 'Construction Items' ? '🧱' : 
+                     option === 'Electronics' ? '📱' :
+                     option === 'Steel/Iron' ? '🔩' :
+                     option === 'Marvels/Tiles' ? '🪨' :
+                     option === 'Cement' ? '🧱' :
+                     option === 'Ply Wood' ? '🪵' : '📋'} {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {formData.load_type === 'Other' && (
+              <TextInput
+                style={[styles.input, { marginTop: 12 }]}
+                placeholder="Describe what you're moving"
+                placeholderTextColor="#9ca3af"
+                onChangeText={(text) => setFormData({ ...formData, load_type: `Other: ${text}` })}
+              />
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Approximate Weight (kg)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Optional"
+              placeholderTextColor="#9ca3af"
+              keyboardType="numeric"
+              value={formData.load_weight_kg}
+              onChangeText={(text) => setFormData({ ...formData, load_weight_kg: text })}
+            />
+          </View>
+        </View>
+
+        {/* Book Button */}
+        <TouchableOpacity
+          style={styles.bookButton}
+          onPress={handleSubmit}
+        >
+          <Text style={styles.bookButtonText}>Continue to Fare</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f7fa',
   },
   header: {
-    backgroundColor: '#FF6B35',
-    padding: 24,
+    backgroundColor: '#1a237e',
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 12,
+  },
+  backIcon: {
+    fontSize: 24,
+    color: '#fff',
+  },
+  headerContent: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   serviceIcon: {
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 36,
+    marginRight: 12,
   },
   serviceTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#fff',
-    marginBottom: 4,
   },
   serviceSubtitle: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.9,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
   },
-  form: {
+  scrollView: {
+    flex: 1,
+    padding: 16,
+  },
+  routeCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
     padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  routeHeader: {
+    marginBottom: 16,
+  },
+  routeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  routeContainer: {
+    flexDirection: 'row',
+  },
+  routeIndicator: {
+    alignItems: 'center',
+    marginRight: 12,
+    paddingTop: 32,
+    width: 20,
+  },
+  locationsContainer: {
+    flex: 1,
+  },
+  dotGreen: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#22c55e',
+    borderWidth: 3,
+    borderColor: '#bbf7d0',
+  },
+  lineVertical: {
+    width: 2,
+    height: 60,
+    backgroundColor: '#d1d5db',
+    marginVertical: 4,
+  },
+  dotRed: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#ef4444',
+    borderWidth: 3,
+    borderColor: '#fecaca',
+  },
+  detailsCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 16,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#4b5563',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9fafb',
     borderRadius: 12,
     padding: 16,
-    fontSize: 16,
+    fontSize: 15,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#e5e7eb',
+    color: '#1a1a1a',
+  },
+  loadTypeOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  loadTypeChip: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+  },
+  loadTypeChipSelected: {
+    backgroundColor: '#e0e7ff',
+    borderColor: '#1a237e',
+  },
+  loadTypeChipText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#4b5563',
+  },
+  loadTypeChipTextSelected: {
+    color: '#1a237e',
+    fontWeight: '600',
   },
   bookButton: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2563eb',
     borderRadius: 12,
     padding: 18,
     alignItems: 'center',
-    marginTop: 12,
-    shadowColor: '#FF6B35',
+    shadowColor: '#2563eb',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -197,7 +347,10 @@ const styles = StyleSheet.create({
   },
   bookButtonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  bottomSpacer: {
+    height: 40,
   },
 });

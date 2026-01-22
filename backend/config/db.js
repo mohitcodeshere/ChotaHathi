@@ -5,8 +5,9 @@ const connectDB = async () => {
         await mongoose.connect(process.env.MONGO_URI);
         console.log('✅ Connected to MongoDB');
     } catch (err) {
-        console.error('❌ MongoDB connection failed:', err.message);
-        process.exit(1);
+        console.error('⚠️ MongoDB connection failed:', err.message);
+        console.log('🔌 Server will continue without MongoDB (WebSockets still work)');
+        // Don't exit - allow server to run for WebSocket testing
     }
 };
 

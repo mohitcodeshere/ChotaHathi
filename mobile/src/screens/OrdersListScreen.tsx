@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, Alert, StatusBar, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { orderAPI, Order } from '../services/api';
@@ -13,7 +13,6 @@ export default function OrdersListScreen({ navigation }: OrdersListScreenProps):
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  // Fetch orders from backend
   const fetchOrders = async (): Promise<void> => {
     try {
       const data = await orderAPI.getPendingOrders();
@@ -28,18 +27,15 @@ export default function OrdersListScreen({ navigation }: OrdersListScreenProps):
     }
   };
 
-  // Fetch orders when screen loads
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Pull to refresh handler
   const onRefresh = useCallback((): void => {
     setRefreshing(true);
     fetchOrders();
   }, []);
 
-  // Navigate to order detail
   const handleOrderPress = (order: Order): void => {
     navigation.navigate('OrderDetail', { orderId: order._id });
   };
@@ -50,6 +46,20 @@ export default function OrdersListScreen({ navigation }: OrdersListScreenProps):
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1a237e" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backIcon}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>My Orders</Text>
+        <View style={styles.headerRight} />
+      </View>
+
       <FlatList
         data={orders}
         keyExtractor={(item) => item._id}
@@ -58,13 +68,26 @@ export default function OrdersListScreen({ navigation }: OrdersListScreenProps):
         )}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FF6B35']} />
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            colors={['#2563eb']} 
+            tintColor="#2563eb"
+          />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📭</Text>
+            <View style={styles.emptyIconContainer}>
+              <Text style={styles.emptyIcon}>📦</Text>
+            </View>
             <Text style={styles.emptyText}>No orders yet</Text>
-            <Text style={styles.emptySubtext}>Book your first delivery!</Text>
+            <Text style={styles.emptySubtext}>Your bookings will appear here</Text>
+            <TouchableOpacity 
+              style={styles.bookNowButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.bookNowText}>Book Now</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -75,27 +98,74 @@ export default function OrdersListScreen({ navigation }: OrdersListScreenProps):
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f7fa',
+  },
+  header: {
+    backgroundColor: '#1a237e',
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: 8,
+  },
+  backIcon: {
+    fontSize: 24,
+    color: '#fff',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  headerRight: {
+    width: 40,
   },
   listContent: {
     padding: 16,
+    flexGrow: 1,
   },
   emptyContainer: {
+    flex: 1,
     alignItems: 'center',
-    marginTop: 80,
+    justifyContent: 'center',
+    paddingTop: 80,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e8f4fd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+    fontSize: 48,
   },
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#666',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   emptySubtext: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 24,
+  },
+  bookNowButton: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  bookNowText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#999',
+    fontWeight: '600',
   },
 });

@@ -7,6 +7,9 @@ import HomeScreen from './src/screens/HomeScreen';
 import BookingScreen from './src/screens/BookingScreen';
 import OrdersListScreen from './src/screens/OrdersListScreen';
 import OrderDetailScreen from './src/screens/OrderDetailScreen';
+import FareScreen from './src/screens/FareScreen';
+import WaitingForDriverScreen from './src/screens/WaitingForDriverScreen';
+import DriverTrackingScreen from './src/screens/DriverTrackingScreen';
 
 export type RootStackParamList = {
   PhoneLogin: undefined;
@@ -17,6 +20,40 @@ export type RootStackParamList = {
     serviceTitle: string;
     loadType: string;
     city: string;
+  };
+  Fare: {
+    bookingData: {
+      vendor_id: string;
+      pickup_location: string;
+      drop_location: string;
+      load_type: string;
+      load_weight_kg: number;
+    };
+  };
+  WaitingForDriver: {
+    bookingData: {
+      vendor_id: string;
+      pickup_location: string;
+      drop_location: string;
+      load_type: string;
+      load_weight_kg: number;
+      fare: number;
+    };
+  };
+  DriverTracking: {
+    bookingId: string;
+    driver: {
+      id: string;
+      name: string;
+      phone: string;
+      vehicle_number: string;
+      vehicle_type: string;
+    };
+    bookingData: {
+      pickup_location: string;
+      drop_location: string;
+      fare: number;
+    };
   };
   OrdersList: undefined;
   OrderDetail: {
@@ -33,7 +70,7 @@ export default function App(): React.JSX.Element {
         initialRouteName="PhoneLogin"
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#FF6B35',
+            backgroundColor: '#1a237e',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
@@ -52,35 +89,56 @@ export default function App(): React.JSX.Element {
         <Stack.Screen 
           name="OTPVerification" 
           component={OTPVerificationScreen}
-          options={{ title: 'Verify OTP' }}
+          options={{ headerShown: false }}
         />
         
         {/* Home Screen - Landing page */}
         <Stack.Screen 
           name="Home" 
           component={HomeScreen}
-          options={{ headerShown: false }} // Hide header for custom design
+          options={{ headerShown: false }}
         />
         
         {/* Booking Screen - Order form */}
         <Stack.Screen 
           name="Booking" 
           component={BookingScreen}
-          options={{ title: 'Book Service' }}
+          options={{ headerShown: false }}
         />
         
         {/* Orders List Screen - All orders */}
         <Stack.Screen 
           name="OrdersList" 
           component={OrdersListScreen}
-          options={{ title: 'My Orders' }}
+          options={{ headerShown: false }}
+        />
+        
+        {/* Fare Screen - Set booking fare */}
+        <Stack.Screen 
+          name="Fare" 
+          component={FareScreen}
+          options={{ headerShown: false }}
+        />
+        
+        {/* Waiting For Driver Screen - Finding driver */}
+        <Stack.Screen 
+          name="WaitingForDriver" 
+          component={WaitingForDriverScreen}
+          options={{ headerShown: false }}
+        />
+        
+        {/* Driver Tracking Screen - Live GPS tracking */}
+        <Stack.Screen 
+          name="DriverTracking" 
+          component={DriverTrackingScreen}
+          options={{ headerShown: false }}
         />
         
         {/* Order Detail Screen - Single order details */}
         <Stack.Screen 
           name="OrderDetail" 
           component={OrderDetailScreen}
-          options={{ title: 'Order Details' }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
