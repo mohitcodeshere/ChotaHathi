@@ -10,10 +10,27 @@ const generateToken = (userId) => {
 };
 
 const sendOTP = async (phoneNumber, otp) => {
+  // Always log OTP to console for development
   console.log('\n🔐 ================================');
   console.log(`📱 Phone:  ${phoneNumber}`);
   console.log(`🔑 OTP: ${otp}`);
   console.log('================================\n');
+
+  // Try to send SMS, but don't fail if it doesn't work
+  try {
+    const twilio = require('twilio');
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+    await client.messages.create({
+      body: `Your ChotaHathi verification code is: ${otp}. Valid for 5 minutes.`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phoneNumber
+    });
+    console.log(`✅ SMS sent to ${phoneNumber}`);
+  } catch (error) {
+    console.log(`ℹ️ SMS not sent (using console OTP instead): ${error.message}`);
+    // Don't throw error - OTP is still valid via console
+  }
 };
 
 exports.sendOTP = async (req, res) => {
