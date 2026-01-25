@@ -1,6 +1,11 @@
 # ChotaHaathi
 ChotaHathi - Hyper-local logistics app for Kangra/Dharamshala
 
+Two Branches on Repo
+
+Main - Original Work
+Dev - all initial development work
+
 # ChotaHathi - Project Development Summary
 
 > **Last Updated:** January 22, 2026  
