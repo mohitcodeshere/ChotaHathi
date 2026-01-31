@@ -6,10 +6,6 @@ Two Branches on Repo
 Main - Original Work
 Dev - all initial development work
 
------
-
-Updated ->
-
 # ChotaHathi - Project Development Summary
 
 > **Last Updated:** January 22, 2026  
@@ -58,294 +54,173 @@ Updated ->
 
 ## 🚀 Features Implemented
 
-### 1. Porter-Style HomeScreen Redesign
+# ChotaHaathi
+ChotaHathi - Hyper-local logistics app for Kangra/Dharamshala
 
-**File:** `mobile/src/screens/HomeScreen.tsx`
+Two Branches on Repo
 
-**Features:**
-- Curved blue header with gradient effect
-- GPS-enabled pickup location card with Plus Code display
-- Vehicle selection cards (Chota Hathi 🚛, Truck 🚚)
-- Live deliveries ticker showing real-time driver activity
-- Auto-scrolling animation (3-second interval)
+Main - Original Work
+Dev - all initial development work
 
-**Key Code:**
-```typescript
-// Live Deliveries Ticker Data
-const driverDeliveries = [
-  { id: '1', driver: 'Rajesh Kumar', from: 'Dharamshala', to: 'Kangra', vehicle: '🚛' },
-  { id: '2', driver: 'Vikram Singh', from: 'Palampur', to: 'Nagrota', vehicle: '🚚' },
-  { id: '3', driver: 'Amit Thakur', from: 'McLeod Ganj', to: 'Gaggal', vehicle: '🚛' },
-  // ... more entries
-];
-```
+# ChotaHathi - Project Development Summary
+
+> **Last Updated:** January 31, 2026  
+> **Platform:** React Native (Expo) + Node.js Backend  
+> **Status:** Active Development
 
 ---
 
-### 2. BookingScreen with Load Type Selection
+## 📱 Project Overview
 
-**File:** `mobile/src/screens/BookingScreen.tsx`
+**ChotaHathi** is a Porter-style logistics and transportation mobile app for booking mini trucks (Chota Hathi) and trucks for goods transportation. The app primarily targets the Kangra, Himachal Pradesh region.
 
-**Features:**
-- Blue themed header with vehicle icon
-- Route indicator with green/red dots and connecting line
-- Location picker integration with GPS
-- Load type chips based on vehicle type
-- Navigates to Fare screen on confirm
+### Tech Stack (from code)
 
-**Load Type Options:**
-| Vehicle Type | Load Options |
-|--------------|--------------|
-| Chota Hathi | Furniture, Construction Items, Electronics, Other |
-| Truck | Steel/Iron, Marvels/Tiles, Cement, Ply Wood, Other |
-
-**Key Code:**
-```typescript
-const loadTypeOptions = serviceType === 'chota-hathi' 
-  ? ['Furniture', 'Construction Items', 'Electronics', 'Other']
-  : ['Steel/Iron', 'Marvels/Tiles', 'Cement', 'Ply Wood', 'Other'];
-```
+| Layer | Technology |
+|-------|------------|
+| Mobile Frontend (mobile) | Expo ~54.0.31, React Native 0.81.5, TypeScript |
+| Driver App (driver-app) | Expo ~54.0.31, React Native 0.77.1 |
+| Navigation | @react-navigation/native, native-stack |
+| Maps | react-native-maps |
+| Location | expo-location |
+| Backend | Node.js, Express 5.x, Socket.io |
+| Database | MongoDB (optional at runtime) |
+| Auth | Phone OTP (console + optional Twilio) |
 
 ---
 
-### 3. GPS Location Picker with Search
+## Backend highlights
 
-**File:** `mobile/src/components/LocationPickerGPS.tsx`
-
-**Features:**
-- Full-screen map with single 📍 emoji marker
-- Search box in header with suggestions dropdown
-- Pre-defined Kangra region locations
-- Plus Code generation from coordinates
-- Geocoding search via expo-location
-
-**Kangra Locations Database:**
-```typescript
-const kangraLocations = [
-  { name: 'Dharamshala Bus Stand', area: 'Dharamshala', coords: { latitude: 32.2190, longitude: 76.3234 } },
-  { name: 'Kangra Fort', area: 'Kangra', coords: { latitude: 32.0998, longitude: 76.2691 } },
-  { name: 'HPCA Stadium', area: 'Dharamshala', coords: { latitude: 32.2262, longitude: 76.3199 } },
-  { name: 'McLeod Ganj Main Square', area: 'McLeod Ganj', coords: { latitude: 32.2427, longitude: 76.3213 } },
-  { name: 'Palampur Bus Stand', area: 'Palampur', coords: { latitude: 32.1109, longitude: 76.5363 } },
-  // ... more locations
-];
-```
-
-**Plus Code Algorithm:**
-```typescript
-const generatePlusCode = (latitude: number, longitude: number): string => {
-  const chars = '23456789CFGHJMPQRVWX';
-  // Grid-based encoding algorithm
-  // Returns format: "MQ8M+WMH"
-};
-```
+- Express server with Socket.io integration (see `backend/server.js`).
+- Server sets `app.set('io', io)` so routes can access Socket.io instance.
+- MongoDB connection uses `process.env.MONGO_URI`. If the DB connection fails the server keeps running so WebSocket-only testing is possible.
 
 ---
 
-### 4. Fare Selection Screen (NEW)
+## API Endpoints (quick reference)
 
-**File:** `mobile/src/screens/FareScreen.tsx`
+Auth:
+- POST `/api/auth/send-otp`  — Body: { phoneNumber }
+- POST `/api/auth/verify-otp` — Body: { phoneNumber, otp }
+- POST `/api/auth/resend-otp` — Body: { phoneNumber }
 
-**Features:**
-- Trip summary card with pickup/drop route display
-- Fare adjustment with +/- buttons (₹50 steps)
-- Quick fare selection chips (₹500, ₹600, ₹750, ₹1000)
-- Minimum fare: ₹500
-- Info tip about higher fare = faster matching
-- Navigates to WaitingForDriver screen
+Orders:
+- POST `/api/orders` — Create order. Body (JSON):
+  {
+    "vendor_id": "<userId>",
+    "pickup_location": "<address or plus code>",
+    "drop_location": "<address or plus code>",
+    "load_type": "<one of load type strings>",
+    "load_weight_kg": 120  // optional
+  }
+- GET `/api/orders` — List pending orders
+- GET `/api/orders/:id` — Get order by id
 
-**Key Code:**
-```typescript
-const [fare, setFare] = useState(500);
-const MIN_FARE = 500;
-const FARE_STEP = 50;
+Responses follow { success: boolean, ... } with orders containing fields from `backend/models/Order.js` (vendor_id, driver_id, pickup_location, drop_location, load_type, load_weight_kg, status, fare_amount, createdAt).
 
-const quickFares = [500, 600, 750, 1000];
+---
+
+## Socket / WebSocket events
+
+The server implements driver/customer coordination events. Important events (server-side names):
+- `driver:online` (payload: driverId)
+- `driver:offline` (driverId)
+- `customer:join` (customerId)
+- `booking:new` (booking object sent from customer)
+- `bookings:list` (sent to newly connected drivers)
+- `booking:confirmed` (sent to customer with bookingId and driversNotified)
+- `booking:accept` (driver accepts booking)
+- `booking:accepted` (broadcast to customer with driver info)
+- `booking:taken` (notify other drivers)
+- `booking:reject`, `booking:cancel` (cancellations)
+- `driver:location` (driver sends location updates for an active trip)
+- `trip:status` (driver updates status; server notifies customer)
+
+The active booking/trip state is kept in-memory (see `server.js`): `onlineDrivers`, `activeBookings`, `activeTrips` maps. Note: this means state is ephemeral and will not survive server restart.
+
+---
+
+## Environment variables (backend)
+
+Create `backend/.env` with at least the following when running in production-like mode:
+
+- `MONGO_URI` — MongoDB connection string
+- `JWT_SECRET` — JWT signing secret used in auth
+- `TWILIO_ACCOUNT_SID` — (optional) Twilio SID for SMS
+- `TWILIO_AUTH_TOKEN` — (optional) Twilio auth token
+- `TWILIO_PHONE_NUMBER` — (optional) From number for Twilio SMS
+- `PORT` — optional (defaults to 5000)
+
+Notes:
+- OTPs are always logged to the server console for development. Twilio is optional; the server will attempt SMS but will continue if SMS sending fails.
+
+---
+
+## Running the project (local quick start)
+
+1) Backend API + Socket server
+
+```powershell
+cd backend
+npm install
+# create a .env file with the env vars above (MONGO_URI, JWT_SECRET, etc.)
+# development with auto-reload:
+npm run dev
+# or production-like:
+npm start
 ```
 
----
+If MongoDB is not available the server will still run (useful for testing WebSocket flows). OTP codes will be printed to the console.
 
-### 5. Waiting For Driver Screen (NEW)
+2) Mobile (customer) app
 
-**File:** `mobile/src/screens/WaitingForDriverScreen.tsx`
-
-**Features:**
-- Animated loader with pulse effect and spinning circle
-- Truck emoji (🚛) in center
-- "Searching for drivers..." animated text
-- Driver notification counter
-- Trip details card with fare offer
-- Cancel search button with confirmation
-- Auto-creates order after 5 seconds (simulating driver match)
-
-**Animations:**
-```typescript
-// Pulse animation for outer circle
-Animated.loop(
-  Animated.sequence([
-    Animated.timing(pulseAnim, { toValue: 1.2, duration: 800 }),
-    Animated.timing(pulseAnim, { toValue: 1, duration: 800 }),
-  ])
-).start();
-
-// Rotation animation for spinner
-Animated.loop(
-  Animated.timing(rotateAnim, { toValue: 1, duration: 2000 })
-).start();
-```
-
----
-
-### 6. Navigation Configuration
-
-**File:** `mobile/App.tsx`
-
-**Route Structure:**
-```typescript
-export type RootStackParamList = {
-  PhoneLogin: undefined;
-  OTPVerification: { phoneNumber: string };
-  Home: undefined;
-  Booking: { serviceType: string; serviceTitle: string; loadType: string; city: string };
-  Fare: { bookingData: { vendor_id, pickup_location, drop_location, load_type, load_weight_kg } };
-  WaitingForDriver: { bookingData: { ...fareData, fare: number } };
-  OrdersList: undefined;
-  OrderDetail: { orderId: string };
-};
-```
-
-**All screens use `headerShown: false` for custom headers.**
-
----
-
-## 📂 File Structure
-
-```
-mobile/
-├── App.tsx                          # Navigation setup
-├── src/
-│   ├── components/
-│   │   ├── CitySelector.tsx
-│   │   ├── HeroSection.tsx
-│   │   ├── LoadingSpinner.tsx
-│   │   ├── LocationPickerGPS.tsx    # Map picker with search
-│   │   ├── LocationPickerGPS.web.tsx
-│   │   ├── OrderCard.tsx
-│   │   ├── ServiceCard.tsx
-│   │   ├── tagline-front.tsx
-│   │   └── VehicleType.tsx
-│   ├── screens/
-│   │   ├── BookingScreen.tsx        # Order form with load types
-│   │   ├── HomeScreen.tsx           # Porter-style landing
-│   │   ├── FareScreen.tsx           # NEW: Fare selection
-│   │   ├── WaitingForDriverScreen.tsx # NEW: Driver search
-│   │   ├── OrderDetailScreen.tsx
-│   │   ├── OrdersListScreen.tsx
-│   │   ├── OTPVerificationScreen.tsx
-│   │   └── PhoneLoginScreen.tsx
-│   ├── services/
-│   │   └── api.ts                   # API client
-│   ├── constants/
-│   │   └── config.ts
-│   └── types/
-│       └── navigation.ts
-```
-
----
-
-## 🔄 User Flow
-
-```
-┌─────────────────┐
-│  PhoneLogin     │
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ OTPVerification │
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│   HomeScreen    │ ◄── Select vehicle (Chota Hathi/Truck)
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ BookingScreen   │ ◄── Set pickup/drop, load type
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│   FareScreen    │ ◄── Set fare offer (₹500+)
-└────────┬────────┘
-         ▼
-┌─────────────────────────┐
-│ WaitingForDriverScreen  │ ◄── Animated search
-└────────┬────────────────┘
-         ▼
-┌─────────────────┐
-│  OrdersList     │ ◄── View all orders
-└─────────────────┘
-```
-
----
-
-## 🛠️ API Endpoints Used
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/orders` | POST | Create new order |
-| `/api/orders` | GET | List all orders |
-| `/api/orders/:id` | GET | Get order details |
-| `/api/auth/send-otp` | POST | Send OTP to phone |
-| `/api/auth/verify-otp` | POST | Verify OTP |
-
----
-
-## 📝 Recent Changes Log
-
-| Date | Change | Files Modified |
-|------|--------|----------------|
-| Jan 22, 2026 | Created FareScreen for fare selection | `FareScreen.tsx`, `App.tsx` |
-| Jan 22, 2026 | Created WaitingForDriverScreen with animations | `WaitingForDriverScreen.tsx`, `App.tsx` |
-| Jan 22, 2026 | Updated BookingScreen to navigate to Fare | `BookingScreen.tsx` |
-| Jan 22, 2026 | Added search box to LocationPickerGPS | `LocationPickerGPS.tsx` |
-| Jan 22, 2026 | Added live deliveries ticker to HomeScreen | `HomeScreen.tsx` |
-| Jan 22, 2026 | Added load type chips to BookingScreen | `BookingScreen.tsx` |
-| Jan 22, 2026 | Changed theme to Porter-style blue | All screens |
-| Jan 22, 2026 | Renamed Trucks to "Chota Hathi" | `HomeScreen.tsx` |
-
----
-
-## 🚧 Pending / Future Work
-
-- [ ] Real driver matching via WebSocket
-- [ ] Payment integration
-- [ ] Order tracking on map
-- [ ] Push notifications
-- [ ] Driver app
-- [ ] Rating system
-- [ ] Fare estimation based on distance
-
----
-
-## 🏃 Running the Project
-
-```bash
-# Install dependencies
+```powershell
 cd mobile
 npm install
-
-# Start Expo
 npx expo start
-
-# Run on Android
+# run on Android:
 npx expo start --android
-
-# Run on iOS
+# run on iOS:
 npx expo start --ios
 ```
 
+3) Driver app (separate Expo app)
+
+```powershell
+cd driver-app
+npm install
+npx expo start
+# run on device/emulator as above
+```
+
 ---
 
-## 👤 Author
+## Models (high level)
 
-**Mohit Kumar**  
+- `User` (see `backend/models/User.js`): phoneNumber, name, role (vendor|driver|admin), isVerified, otp (object), lastLogin
+- `Order` (see `backend/models/Order.js`): vendor_id, driver_id, pickup_location, drop_location, load_type, load_weight_kg, status, fare_amount, timestamps
+
+Note: `backend/models/Vehicle.js` exists but is currently empty in the repository.
+
+---
+
+## Development notes & behaviour
+
+- OTP workflow logs OTP to console and stores code on `User.otp` for verification. The server limits OTP attempts and expiry (5 minutes, 5 attempts).
+- WebSocket booking flow: when a customer emits `booking:new`, the server stores it in `activeBookings` and broadcasts to the `drivers` room; drivers accept by emitting `booking:accept` which creates an `activeTrips` entry and notifies the customer.
+- State is in-memory; consider adding Redis or persistent store for production.
+
+---
+
+## TODO / Future work
+
+- Real driver matching with persistence
+- Payment integration
+- Push notifications
+- Order tracking on map
+- Driver rating system
+
+---
+
+## Contact / Author  
 Project: ChotaHathi Logistics App
