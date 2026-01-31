@@ -32,6 +32,54 @@ Dev - all initial development work
 
 ---
 
+## 📂 Folder Structure
+
+### backend/
+
+```
+backend/
+  config/
+    db.js
+  controllers/
+    AuthController.js
+    orderController.js
+  middleware/
+    AuthMiddleware.js
+  models/
+    Order.js
+    User.js
+    Vehicle.js
+  routes/
+    AuthRoutes.js
+    orderRoutes.js
+  package.json
+  server.js
+```
+
+### driver-app/
+
+```
+driver-app/
+  app.json
+  App.tsx
+  index.js
+  package.json
+  tsconfig.json
+  src/
+    constants/
+      config.ts
+    screens/
+      ActiveOrderScreen.tsx
+      BookingDetailScreen.tsx
+      HomeScreen.tsx
+      OTPVerificationScreen.tsx
+      PhoneLoginScreen.tsx
+      ProfileScreen.tsx
+    services/
+      api.ts
+      socket.ts
+```
+
 ## 🎨 Design System
 
 ### Color Palette
