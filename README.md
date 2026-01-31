@@ -79,6 +79,46 @@ driver-app/
       api.ts
       socket.ts
 ```
+### mobile/
+
+```
+mobile/
+  app.json
+  App.tsx
+  index.js
+  package.json
+  tsconfig.json
+  assets/
+  src/
+    components/
+      CitySelector.tsx
+      HeroSection.tsx
+      LoadingSpinner.tsx
+      LocationPickerGPS.tsx
+      LocationPickerGPS.web.tsx
+      OrderCard.tsx
+      ServiceCard.tsx
+      tagline-front.tsx
+      VehicleType.tsx
+    constants/
+      config.ts
+    screens/
+      BookingScreen.tsx
+      DriverTrackingScreen.tsx
+      FareScreen.tsx
+      HomeScreen.tsx
+      OrderDetailScreen.tsx
+      OrdersListScreen.tsx
+      OTPVerificationScreen.tsx
+      PhoneLoginScreen.tsx
+      WaitingForDriverScreen.tsx
+    services/
+      api.ts
+      socket.ts
+    types/
+      navigation.ts
+```
+
 
 ## 🎨 Design System
 
