@@ -9,7 +9,7 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, error:  'Not authorized' });
+    return res.status(401).json({ success: false, error:  'Token not authorized' });
   }
 
   try {
