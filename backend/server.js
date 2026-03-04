@@ -30,6 +30,7 @@ app.set('io', io);
 
 // Socket.io connection handling
 const onlineDrivers = new Map(); // driverId -> socketId
+const socketToDriver = new Map(); // socketId -> driverId
 const activeBookings = new Map(); // bookingId -> booking data
 const activeTrips = new Map(); // bookingId -> { customerId, driverId, status, driverLocation }
 
@@ -38,7 +39,15 @@ io.on('connection', (socket) => {
 
   // Driver goes online
   socket.on('driver:online', (driverId) => {
+    // Cleanup old socket mapping if driver reconnects
+    const oldSocketId = onlineDrivers.get(driverId);
+    if (oldSocketId && oldSocketId !== socket.id) {
+      socketToDriver.delete(oldSocketId);
+    }
+
     onlineDrivers.set(driverId, socket.id);
+    socketToDriver.set(socket.id, driverId);
+
     socket.join('drivers'); // Join drivers room
     socket.join(`driver_${driverId}`); // Personal room for driver
     console.log(`🚛 Driver ${driverId} is now online. Total drivers: ${onlineDrivers.size}`);
@@ -50,6 +59,10 @@ io.on('connection', (socket) => {
 
   // Driver goes offline
   socket.on('driver:offline', (driverId) => {
+    const socketId = onlineDrivers.get(driverId);
+    if (socketId) {
+      socketToDriver.delete(socketId);
+    }
     onlineDrivers.delete(driverId);
     socket.leave('drivers');
     socket.leave(`driver_${driverId}`);
@@ -159,13 +172,12 @@ io.on('connection', (socket) => {
 
   // Handle disconnect
   socket.on('disconnect', () => {
-    // Find and remove driver from online list
-    for (const [driverId, socketId] of onlineDrivers.entries()) {
-      if (socketId === socket.id) {
-        onlineDrivers.delete(driverId);
-        console.log(`🔌 Driver ${driverId} disconnected`);
-        break;
-      }
+    // Find and remove driver from online list (Optimized O(1))
+    const driverId = socketToDriver.get(socket.id);
+    if (driverId) {
+      onlineDrivers.delete(driverId);
+      socketToDriver.delete(socket.id);
+      console.log(`🔌 Driver ${driverId} disconnected`);
     }
     console.log('🔌 Client disconnected:', socket.id);
   });
